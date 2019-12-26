@@ -6,38 +6,75 @@ var app = express();
 var Usuario = require('../models/usuario');
 
 
-//==========================
-// Obtener todos los usuario
-//==========================
-app.get('/', (request, response) => {
-    //Usuario.find({ }, (err, usuarios) =>{}
 
+//=======================================
+// Obtener todos los usuario paginados
+//.skip(5)
+//.limit(5)
+//Usuario.count({})
+//=======================================
+app.get('/', (req, resp) => {
+    var desde = req.query.desde || 0;
+    //hardcodear
+    desde= Number(desde);    
     Usuario.find({ }, 'nombre email img role ')
+    .skip(desde)
+    .limit(5)
     .exec((err, usuarios) =>{
         if(err){
             //ERROR: Internal server
-            return response.status(500).json({ 
+            return resp.status(500).json({ 
                 ok: false,
                 mensaje: 'Error cargando usuario',
                 errors: err
             })        
         }
-        response.status(200).json({ 
-            ok: true,
-            usuarios: usuarios
+        Usuario.count({}, (err, conteo) => {
+            resp.status(200).json({ 
+                ok: true,
+                usuarios: usuarios,
+                total : conteo
+            })    
         })
+        
     })    
 } );
+
+//==========================
+// Obtener todos los usuario
+//==========================
+// app.get('/', (req, resp) => {
+//     //Usuario.find({ }, (err, usuarios) =>{}
+
+//     Usuario.find({ }, 'nombre email img role ')
+//     .exec((err, usuarios) =>{
+//         if(err){
+//             //ERROR: Internal server
+//             return resp.status(500).json({ 
+//                 ok: false,
+//                 mensaje: 'Error cargando usuario',
+//                 errors: err
+//             })        
+//         }
+//         resp.status(200).json({ 
+//             ok: true,
+//             usuarios: usuarios
+//         })
+//     })    
+// } );
+
+
+
 
 //*********************** */
 // verificar token
 //********************** */
-// app.use('/', (request,response,next) => {
-//     var  token = request.query.token;
+// app.use('/', (req,resp,next) => {
+//     var  token = req.query.token;
 //     jwt.verify( token, SEED, (err, decoded) =>{
 //         if(err){
 //             //unauthorize
-//             return response.status(401).json({
+//             return resp.status(401).json({
 //                 ok:false,
 //                 mensaje:'Token incorrecto',
 //                 errors: err
@@ -48,15 +85,15 @@ app.get('/', (request, response) => {
 // })
 
 //==========================
-//  crear nuevo usuario ( put - patch)
+//  actualizar usuario ( put - patch)
 //==========================
-app.put('/:id', mdAutenticacion.verificaToken, (request,response) => {
-    var id= request.params.id;
-    var body = request.body;
+app.put('/:id', mdAutenticacion.verificaToken, (req,resp) => {
+    var id= req.params.id;
+    var body = req.body;
 
     Usuario.findById(id, (err, usuario) => {
         if( err ){
-            response.status(500).json({ 
+            return resp.status(500).json({ 
                 ok: false,
                 mensaje: 'Error al buscar usuario',
                 errors: err
@@ -64,7 +101,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (request,response) => {
         }  
 
         if( !usuario ){
-            response.status(400).json({ 
+            return resp.status(400).json({ 
                 ok: false,
                 mensaje: 'El usuario con el id no existe',
                 errors: {message: 'No existe el usuario'}
@@ -77,15 +114,15 @@ app.put('/:id', mdAutenticacion.verificaToken, (request,response) => {
 
         usuario.save( (err, usuarioGuardado ) => {
             if(err){
-             // ERROR: bad request   
-             response.status(400).json({ 
+             // ERROR: bad req   
+             resp.status(400).json({ 
                  ok: false,
-                 mensaje: 'Error al crear usuario',
+                 mensaje: 'Error al guardar usuario',
                  errors: err
              }) 
             }
            usuarioGuardado.password = ':)';
-           response.status(200).json({ 
+           resp.status(200).json({ 
             ok: true,
             usuario: usuarioGuardado
            })
@@ -96,8 +133,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (request,response) => {
 //==========================
 //  crear nuevo usuario
 //==========================
- app.post('/', mdAutenticacion.verificaToken ,(request, response) => {
-    var body = request.body;
+ app.post('/', mdAutenticacion.verificaToken ,(req, resp) => {
+    var body = req.body;
     var usuario = new Usuario({
          nombre: body.nombre,
          email: body.email,
@@ -108,17 +145,17 @@ app.put('/:id', mdAutenticacion.verificaToken, (request,response) => {
      
      usuario.save( (err, usuarioGuardado ) => {
          if(err){
-          // ERROR: bad request   
-          response.status(400).json({ 
+          // ERROR: bad req   
+          return resp.status(400).json({ 
               ok: false,
               mensaje: 'Error al crear usuario',
               errors: err
           }) 
          }
-        response.status(201).json({ 
+        resp.status(201).json({ 
          ok: true,
          usuario: usuarioGuardado,
-         usuarioTk : request.usuario
+         usuarioTk : req.usuario
         })
         
     });
@@ -129,25 +166,25 @@ app.put('/:id', mdAutenticacion.verificaToken, (request,response) => {
 // borrar usuario por el id
 //==========================
 
-app.delete('/:id',mdAutenticacion.verificaToken,(request,response) => {
-    var id = request.params.id;
+app.delete('/:id',mdAutenticacion.verificaToken,(req,resp) => {
+    var id = req.params.id;
     Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
         if(err){
-            // ERROR: bad request   
-            response.status(400).json({ 
+            // ERROR: bad req   
+            return resp.status(400).json({ 
                 ok: false,
                 mensaje: 'Error al borrar usuario',
                 errors: err
             }) 
            }
         if( !usuarioBorrado ){
-           response.status(400).json({ 
+           return resp.status(400).json({ 
                ok: false,
                mensaje: 'No existe un usuario con ese id',
                errors: {message: 'No existe el usuario'}
             }); 
         }
-        response.status(200).json({ 
+        resp.status(200).json({ 
            ok: true,
            usuario: usuarioBorrado
         })
