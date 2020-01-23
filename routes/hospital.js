@@ -7,13 +7,15 @@ var Hospital = require('../models/hospital');
 
 app.get('/', (req,resp) =>{
     var desde = req.query.desde || 0;
-    desde = Number(desde);
+    desde = Number(desde); 
 
     Hospital.find({})
     .skip(desde)
-    .limit(2)
+    .limit(5)
     .populate('usuario','nombre email') 
     .exec((err, hospitales) =>{
+        console.log('find hospitales')
+        console.log(hospitales)
         if(err){
             return resp.status(500).json({
                 ok: false,
@@ -24,11 +26,45 @@ app.get('/', (req,resp) =>{
         Hospital.count({}, (err, conteo) => {
             resp.status(200).json({
                 ok: true,
+                total: conteo,
                 hospitales
             });
         })        
     });
 });
+
+//====================================
+// Obtener hospital por ID 
+//====================================
+app.get('/:id', (req, res) => {
+    console.log('get:id hosptal.js')
+    var id= req.params.id;
+    Hospital.findById(id)
+    .populate('usuario','nombre img email')
+    .exec( (err, hospital) => {
+        if(err){
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar hospital',
+                errors: err
+            })
+        }
+        console.log(hospital)
+        if( !hospital ){
+            return res.status(400).json({
+                ok: false,
+                mensaje:'El hospital con el id' +id+' no existe!',
+                errors: {  mensaje: 'No existe un hospital con ese ID'}
+            })
+        }
+
+        res.status(200).json({
+            ok: true,
+            hospital
+        })
+
+    })
+})
 
 //==========================
 //  actualizar hospital  ( put - patch)
@@ -56,8 +92,8 @@ app.put('/:id', (req,resp) => {
         hospital.nombre = body.nombre;
         hospital.usuario = req.usuario;
         //hospital.img = body.img;
-
-        hospital.save( (err, hospitalGuardado) => {
+        console.log(hospital)
+        hospital.save( (err, hospital) => {
             if(err){
                 return resp.status(400).json({
                     ok: false,
@@ -67,8 +103,9 @@ app.put('/:id', (req,resp) => {
             }
             resp.status(200).json({
                 ok: true,
-                hospitalGuardado
+                hospital
             })
+            console.log(hospital)
         });
 
     });
@@ -80,22 +117,29 @@ app.put('/:id', (req,resp) => {
 // Crear un nuevo hospital
 // ==========================================
 app.post('/', mdAutenticacion.verificaToken, (req, resp) => {
+//app.post('/', (req, resp) => {   
+    console.log('post body') 
+    console.log(req.body)
+    console.log(req.usuario)
+
     var body = req.body;
     var hospital = new Hospital({
         nombre: body.nombre,
         usuario: req.usuario._id
     })
+    console.log(hospital)
+
     hospital.save((err, hospitalGuardado) => {
         if(err){
             return resp.status(400).json({
                 ok: false,
-                mensaje: 'Error al crear medico',
+                mensaje: 'Error al crear hospital',
                 error: err
             })
         }
-        resp.status(201).json({
+       return resp.status(201).json({
             ok: true,
-            hospitalGuardado
+            hospital: hospitalGuardado
         })
     });
 });
@@ -127,5 +171,7 @@ app.delete('/:id',mdAutenticacion.verificaToken, (req, resp) => {
         })
     })
 });
+
+
 
 module.exports = app;

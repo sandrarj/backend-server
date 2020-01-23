@@ -17,10 +17,12 @@ app.get('/', (req, resp) => {
     var desde = req.query.desde || 0;
     //hardcodear
     desde= Number(desde);    
-    Usuario.find({ }, 'nombre email img role ')
+    Usuario.find({ }, 'nombre email img role google')
     .skip(desde)
     .limit(5)
     .exec((err, usuarios) =>{
+        console.log('find usuarios')
+        console.log(usuarios)
         if(err){
             //ERROR: Internal server
             return resp.status(500).json({ 
@@ -133,7 +135,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (req,resp) => {
 //==========================
 //  crear nuevo usuario
 //==========================
- app.post('/', mdAutenticacion.verificaToken ,(req, resp) => {
+ //app.post('/', mdAutenticacion.verificaToken ,(req, resp) => {
+app.post('/', (req, resp) => {
     var body = req.body;
     var usuario = new Usuario({
          nombre: body.nombre,

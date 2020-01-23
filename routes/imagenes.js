@@ -12,6 +12,7 @@ app.get('/:tipo/:img', (req, res) =>{
         res.sendFile(pathImagen);
     } else {
         var pathNoImagen = path.resolve( __dirname,'../assets/no-img.jpg' );
+        console.log(pathNoImagen)
         res.sendFile(pathNoImagen);
     }
 });

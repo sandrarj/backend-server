@@ -79,7 +79,7 @@ function subirPorTipo( tipo, id, nombreArchivo, res){
                     })
                 }
                 // validar si existe una img en el usuario
-                var pathViejo = './uploads/usuarios/'+ usuario.img;
+                var pathViejo = './upload/usuarios/'+ usuario.img;
                 if( fs.existsSync(pathViejo)){
                     //eliminar el archivo si existe
                     fs.unlink(pathViejo);
@@ -95,7 +95,7 @@ function subirPorTipo( tipo, id, nombreArchivo, res){
                     }
                     return res.status(200).json({
                         ok: true,
-                        mensaje:'Archivo movido',
+                        mensaje:'Imagen de usuario actualizada',
                         usuario: usuarioActualizado
                     })    
                 });
@@ -111,7 +111,7 @@ function subirPorTipo( tipo, id, nombreArchivo, res){
                     })
                 }
                 // validar si existe ima img en el usuario
-                var pathViejo = './uploads/medicos/'+ medico.img;
+                var pathViejo = './upload/medicos/'+ medico.img;
                 if( fs.existsSync(pathViejo)){
                     //eliminar el archivo si existe
                     fs.unlink(pathViejo);
@@ -127,7 +127,7 @@ function subirPorTipo( tipo, id, nombreArchivo, res){
                     }
                     return res.status(200).json({
                         ok: true,
-                        mensaje:'Archivo movido',
+                        mensaje:'Imagen de médico actualizada',
                         medico: medicoActualizado
                     })    
                 });
@@ -143,7 +143,7 @@ function subirPorTipo( tipo, id, nombreArchivo, res){
                     })
                 }
                 // validar si existe ima img en el usuario
-                var pathViejo = './uploads/hospitales/'+ hospital.img;
+                var pathViejo = './upload/hospitales/'+ hospital.img;
                 if( fs.existsSync(pathViejo)){
                     //eliminar el archivo si existe
                     fs.unlink(pathViejo);
@@ -159,7 +159,7 @@ function subirPorTipo( tipo, id, nombreArchivo, res){
                     }
                     return res.status(200).json({
                         ok: true,
-                        mensaje:'Archivo movido',
+                        mensaje:'Imagen de hospital actualizada',
                         hospital: hospitalActualizado
                     })    
                 });
@@ -171,7 +171,6 @@ function subirPorTipo( tipo, id, nombreArchivo, res){
 }
 
 app.get('/', function(req, res) {
-    console.log(req)
     res.status(200).json({ 
         ok: true,
         mensaje:' Conectado con upload'
