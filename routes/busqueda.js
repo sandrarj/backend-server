@@ -9,6 +9,7 @@ var Usuario = require('../models/usuario');
 // Busqueda general
 //****************************** 
 app.get('/todo/:busqueda', (req, resp) => {
+    console.log('buscar todo')
     var busqueda = req.params.busqueda;
     var regex = new RegExp(busqueda, 'i');
 
@@ -30,7 +31,7 @@ function buscarHospitales( busqueda, regex){
     return new Promise( (resolve, reject) => {
         //paginar
         Hospital.find({nombre: regex })
-        .populate('usuario','nombre email')
+        .populate('usuario','nombre email img')
         .exec( (err,hospitales) => {
             if(err){
                 reject('Error al cargar hospitales', err);
@@ -46,7 +47,7 @@ function buscarMedicos( busqueda, regex){
         //paginar
         Medico.find({nombre: regex })
         .populate('usuario',' nombre email')
-        .populate('hospital')
+        .populate('hospital',' img ')
         .exec( (err,medicos) => {
             if(err){
                 reject('Error al cargar medicos', err);
@@ -59,7 +60,7 @@ function buscarMedicos( busqueda, regex){
 
 function buscarUsuarios( busqueda, regex){
     return new Promise( (resolve, reject) => {
-        Usuario.find({}, 'nombre email role')
+        Usuario.find({}, 'nombre email role img')
         .or([ {'nombre': regex}, {'email': regex}])
         .exec({nombre: regex }, (err,medicos) => {
             if(err){

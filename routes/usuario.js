@@ -65,31 +65,10 @@ app.get('/', (req, resp) => {
 //     })    
 // } );
 
-
-
-
-//*********************** */
-// verificar token
-//********************** */
-// app.use('/', (req,resp,next) => {
-//     var  token = req.query.token;
-//     jwt.verify( token, SEED, (err, decoded) =>{
-//         if(err){
-//             //unauthorize
-//             return resp.status(401).json({
-//                 ok:false,
-//                 mensaje:'Token incorrecto',
-//                 errors: err
-//             })
-//         }
-//         next();
-//     } );
-// })
-
 //==========================
 //  actualizar usuario ( put - patch)
 //==========================
-app.put('/:id', mdAutenticacion.verificaToken, (req,resp) => {
+app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIM_MismoUsuario], (req,resp) => {
     var id= req.params.id;
     var body = req.body;
 
@@ -169,7 +148,7 @@ app.post('/', (req, resp) => {
 // borrar usuario por el id
 //==========================
 
-app.delete('/:id',mdAutenticacion.verificaToken,(req,resp) => {
+app.delete('/:id',[mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIM_MismoUsuario],(req,resp) => {
     var id = req.params.id;
     Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
         if(err){

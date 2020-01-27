@@ -11,9 +11,11 @@ const client = new OAuth2Client(CLIENT_ID);
 var Usuario = require('../models/usuario');
 var app = express();
 
-//***************/
-// google
-//**************/
+
+
+//****************************/
+// Autenticación de google
+//***************************/
 async function verify(token) {
     const ticket = await client.verifyIdToken({
         idToken: token,
@@ -21,7 +23,6 @@ async function verify(token) {
     });
     const payload = ticket.getPayload();
     const userid = payload['sub'];
-    console.log(payload);
     return {
         nombre: payload.name,
         email: payload.email,
@@ -71,7 +72,8 @@ app.post('/google', async (req,res) =>{
                     ok: true,
                     usuario: usuarioDB,
                     token: token,
-                    id: usuarioDB._id
+                    id: usuarioDB._id,
+                    menu: obtenerMenu(usuarioDB.role)
                 })
             }
         } else  {
@@ -96,7 +98,8 @@ app.post('/google', async (req,res) =>{
                      ok: true,
                      usuario: usuarioDB,
                      token: token,
-                     id: usuarioDB._id
+                     id: usuarioDB._id,
+                     menu: obtenerMenu(usuarioDB.role)
                  })
             }))
         }
@@ -109,10 +112,11 @@ app.post('/google', async (req,res) =>{
     // })
 });
 
+//****************************/
+// Autenticación normal
+//***************************/
 app.post('/', (request,response) => {
     var body = request.body;
-    console.log('login.js :post ')
-    console.log(body)
     Usuario.findOne({email: body.email},(err,usuarioDB) =>{
         if(err){
             response.status(500).json({ 
@@ -131,7 +135,7 @@ app.post('/', (request,response) => {
         if(!bcrypt.compareSync(body.password, usuarioDB.password)){
             return response.status(400).json({
                 ok: false,
-                mensaje: ' Credenciales incorrectas - pass',
+                mensaje: ' Credenciales incorrectas - xxx',
                 errors: err
             })
         }
@@ -147,11 +151,62 @@ app.post('/', (request,response) => {
             ok: true,
             usuario: usuarioDB,
             token: token,
-            id: usuarioDB._id
+            id: usuarioDB._id,
+            menu: obtenerMenu(usuarioDB.role)
         })
     })
 })
 
+//**************** */
+// opciones del menu
+//**************** */
+function obtenerMenu( ROLE ){
+
+    var menu = [
+        { 
+          titulo: 'principal' , 
+          icono:'mdi mdi-gauge', 
+          submenu: [ 
+            { 
+              titulo:'Dashboard',
+              url:'/dashboard'
+            },
+            { 
+              titulo:'Progress',
+              url:'/progress'
+            },
+            { 
+              titulo:'Graficas',
+              url:'/graficas1'
+            },
+            { 
+              titulo:'Promesas',
+              url:'/promesas'
+            },
+            { 
+              titulo:'rxjs',
+              url:'/rxjs'
+            }       
+          ]
+        },
+        { 
+          titulo:'Mantenimiento',
+          icono:'mdi mdi-folder-lock-open',
+          submenu: [
+           // {titulo: 'Usuarios', url:'/usuarios'},
+            {titulo: 'Hospitales', url:'/hospitales'},
+            {titulo: 'Médicos', url:'/medicos'}
+          ]
+        }
+      ];
+
+      if( ROLE === 'ADMIN_ROLE' ){
+          console.log(ROLE)
+          menu[1].submenu.unshift({titulo: 'Usuarios', url:'/usuarios'});
+      }
+    return menu
+
+  }
 
 
 

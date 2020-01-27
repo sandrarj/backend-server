@@ -16,11 +16,8 @@ app.get('/', (req,resp) => {
     .skip(desde)
     .limit(5)
     .populate('usuario','nombre email')
-    .populate('medico','nombre')
+    .populate('hospital','nombre')
     .exec((err, medicos) => {
-        console.log('find medicos')
-        console.log(medicos)
-        console.log(err)
         if(err){
             return resp.status(500).json({
                 ok: false,
